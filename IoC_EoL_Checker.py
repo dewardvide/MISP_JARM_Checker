@@ -4,13 +4,13 @@ import os
 
 def update():
     download_status = ''
-    update_response = requests.get(':https://github.com/03bee4a8-135d-4d93-8125-cd84ecf5b50')
+    update_response = requests.get('https://raw.githubusercontent.com/salesforce/jarm/master/jarm.py')
     if update_response.status_code == 200:
         with open('jarm.py', 'wb') as f:
             f.write(update_response.content)
-            download_status =  "Update Complete"
+            download_status =  print("Update Complete")
     else: 
-        download_status = "Update Failed. Status Code: "+update_response.status_code
+        download_status = print("Update Failed. Status Code: ", update_response.status_code)
 
     return download_status
 
