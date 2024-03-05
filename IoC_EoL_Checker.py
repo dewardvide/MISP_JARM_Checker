@@ -5,6 +5,7 @@ import os
 def update():
     download_status = ''
     update_response = requests.get('https://raw.githubusercontent.com/salesforce/jarm/master/jarm.py')
+
     if update_response.status_code == 200:
         with open('jarm.py', 'wb') as f:
             f.write(update_response.content)
@@ -21,21 +22,22 @@ def main():
     # Add arguments
     parser.add_argument('-u', '--update', action='store_true', help='Update JARM.')
     parser.add_argument('-f', '--flag', action='store_true', help='Description of the flag.')
-    #parser.add_argument('-o', '--optional', type=int, help='Description of an optional argument.')
 
     # Parse the command-line arguments
     args = parser.parse_args()
 
+    #return usage where flags are not used
+    if not any(vars(args).values()):
+        parser.print_usage()
+        return
+    
     # Access the arguments
     if args.update: 
         update()
 
     if args.flag:
         print("Flag is set.")
-
-    #if args.optional:
-    #    print("Optional argument is set to:", args.optional)
         
-main()
-
+if __name__ == "__main__":
+    main()
 
