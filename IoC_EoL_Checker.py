@@ -5,7 +5,7 @@ import os
 import subprocess
 import json
 
-class MISP:
+class MISP_Config:
     # Class attributes for MISP IP and Auth Key
     MISP_Ip = None
     MISP_Auth_Key = None
@@ -18,19 +18,50 @@ class MISP:
 
     def __init__(self):
         # Load configuration from JSON file if class attributes are not set
-        if not MISP.MISP_Ip or not MISP.MISP_Auth_Key:
+        if not MISP_Config.MISP_Ip or not MISP_Config.MISP_Auth_Key:
             with open('config.json') as f:
                 Config_Items = json.load(f)
         
-            MISP.set_config(Config_Items.get('MISP_IP'), Config_Items.get('MISP_AUTH_KEY'))
+            MISP_Config.set_config(Config_Items.get('MISP_IP'), Config_Items.get('MISP_AUTH_KEY'))
     
-    def print_test(self):
-        print(MISP.MISP_Ip)
-        print(MISP.MISP_Auth_Key)
+    def fetch_ip(self):
+        ip = MISP_Config.MISP_Ip
+        return ip
+    
+    def fetch_key(self):
+        key = MISP_Config.MISP_Auth_Key
+        return key 
  
-def Object_Enrichment(): 
-    return 
+class Object_Enrichment:
 
+    def __init__(self, MISP_Config):
+        self.MISP_Config = MISP_Config
+
+    def get_attribute(self):
+        MISP_Ip = self.MISP_Config.fetch_ip()
+        MISP_Key = self.MISP_Config.fetch_key()
+        #example event ID 
+        Event_ID = 443
+        Data = {
+            'eventid' : '{}'.format(Event_ID)
+        }
+        Json_Data = json.dumps(Data)
+        Url = 'https://'+MISP_Ip+'/attributes/restSearch'
+        Headers = {"Authorization": "{}".format(MISP_Key), "Content-Type": "application/json"}
+        
+        #print headers
+        print(Headers)
+        print(Json_Data)
+        #SSL verification is false
+        response = requests.post(Url, headers=Headers, data=Json_Data, verify=False)
+
+        if response.status_code == 200:
+            print("Request successful")
+            print("Response:", response.json())
+        else:
+            print("Request failed:", response.status_code)
+            print("Response:", response.text)
+        
 def update():
     download_status = ''
     update_response = requests.get('https://raw.githubusercontent.com/salesforce/jarm/master/jarm.py')
@@ -66,8 +97,11 @@ def main():
         update()
 
     if args.test:
-        misp_i = MISP()
-        misp_i.print_test()
+        misp_i = MISP_Config()
+        o_e = Object_Enrichment(misp_i)
+        print(misp_i.fetch_ip())
+        print(misp_i.fetch_key())
+        print(o_e.get_attribute())
         
 if __name__ == "__main__":
     main()
