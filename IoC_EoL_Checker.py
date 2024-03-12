@@ -1,6 +1,5 @@
 import requests
 import argparse
-#import jarm
 import os 
 import subprocess
 import json
@@ -41,27 +40,41 @@ class Object_Enrichment:
         MISP_Ip = self.MISP_Config.fetch_ip()
         MISP_Key = self.MISP_Config.fetch_key()
         #example event ID 
-        Event_ID = 443
+        Event_ID = 951
         Data = {
-            'eventid' : '{}'.format(Event_ID)
+            'eventid' : '{}'.format(Event_ID), 
+            #get IP addresses and domains attributes
+            'type' : ["domain", "ip-src", "ip-dst"]
         }
         Json_Data = json.dumps(Data)
         Url = 'https://'+MISP_Ip+'/attributes/restSearch'
         Headers = {"Authorization": "{}".format(MISP_Key), "Content-Type": "application/json"}
         
-        #print headers
-        print(Headers)
-        print(Json_Data)
+        #print headers (Testing)
+        #print(Headers)
+        #print(Json_Data)
+
         #SSL verification is false
         response = requests.post(Url, headers=Headers, data=Json_Data, verify=False)
 
         if response.status_code == 200:
             print("Request successful")
-            print("Response:", response.json())
+            return response.json()
         else:
             print("Request failed:", response.status_code)
-            print("Response:", response.text)
-        
+            return response.text
+
+    def enrichment(self): 
+        #get attributes
+        response = self.get_attribute()
+        #print individual attributes
+        for attribute in response['response']['Attribute']:
+            values = attribute['value']
+            #initiate subprocess to collect jarm fingerprints
+            jarm = subprocess.run(['python3', 'jarm.py', '{}'.format(values)])
+            print(jarm)
+            #Next ideas: create a comment with the JARM
+
 def update():
     download_status = ''
     update_response = requests.get('https://raw.githubusercontent.com/salesforce/jarm/master/jarm.py')
@@ -101,7 +114,7 @@ def main():
         o_e = Object_Enrichment(misp_i)
         print(misp_i.fetch_ip())
         print(misp_i.fetch_key())
-        print(o_e.get_attribute())
+        print(o_e.enrichment())
         
 if __name__ == "__main__":
     main()
