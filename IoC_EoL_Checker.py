@@ -40,7 +40,7 @@ class Object_Enrichment:
         MISP_Ip = self.MISP_Config.fetch_ip()
         MISP_Key = self.MISP_Config.fetch_key()
         #example event ID 
-        Event_ID = 951
+        Event_ID = 458
         Data = {
             'eventid' : '{}'.format(Event_ID), 
             #get IP addresses and domains attributes
@@ -64,16 +64,31 @@ class Object_Enrichment:
             print("Request failed:", response.status_code)
             return response.text
 
-    def enrichment(self): 
+    def enrichment(self):
+        MISP_Ip = self.MISP_Config.fetch_ip()
+        MISP_Key = self.MISP_Config.fetch_key() 
         #get attributes
         response = self.get_attribute()
         #print individual attributes
         for attribute in response['response']['Attribute']:
             values = attribute['value']
+            attribute_id = attribute['id']
             #initiate subprocess to collect jarm fingerprints
-            jarm = subprocess.run(['python3', 'jarm.py', '{}'.format(values)])
+            jarm_process = subprocess.run(['python3', 'jarm.py', '{}'.format(values)], capture_output=True, text=True)
+            jarm = jarm_process.stdout.strip()
+            #test
+            print(values)
+            print(attribute_id)
             print(jarm)
-            #Next ideas: create a comment with the JARM
+            #Add comment
+            Data = {
+            'comment' : '{}'.format(jarm), 
+            }
+            Json_Data = json.dumps(Data)
+            Url = 'https://'+MISP_Ip+'/attributes/edit/'+attribute_id
+            Headers = {"Authorization": "{}".format(MISP_Key), "Content-Type": "application/json"}
+            response = requests.put(Url, headers=Headers, data=Json_Data, verify=False)
+            print(response.status_code)
 
 def update():
     download_status = ''
