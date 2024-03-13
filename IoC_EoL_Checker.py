@@ -75,7 +75,9 @@ class Object_Enrichment:
             attribute_id = attribute['id']
             #initiate subprocess to collect jarm fingerprints
             jarm_process = subprocess.run(['python3', 'jarm.py', '{}'.format(values)], capture_output=True, text=True)
-            jarm = jarm_process.stdout.strip()
+            jarm_raw_data = jarm_process.stdout.strip()
+            jarm_raw_data_lines = jarm_raw_data.splitlines()
+            jarm = jarm_raw_data_lines[-1]
             #test
             print(values)
             print(attribute_id)
@@ -88,7 +90,7 @@ class Object_Enrichment:
             Url = 'https://'+MISP_Ip+'/attributes/edit/'+attribute_id
             Headers = {"Authorization": "{}".format(MISP_Key), "Content-Type": "application/json"}
             response = requests.put(Url, headers=Headers, data=Json_Data, verify=False)
-            print(response.status_code)
+            print(response)
 
 def update():
     download_status = ''
