@@ -92,6 +92,38 @@ class Object_Enrichment:
             response = requests.post(Url, headers=Headers, data=Json_Data, verify=False)
             print(response.status_code)
 
+class Change_Checker():
+    #checks for changes in the JARM 
+    def __init__(self, Object_Enrichment, MISP_Config):
+        self.Object_Enrichment = Object_Enrichment
+        self.MISP_Config = MISP_Config
+
+    def checker(self): 
+        #tag ID
+        tag_Id = 1444
+        MISP_Key = self.MISP_Config.fetch_key()
+        MISP_Ip = self.MISP_Config.fetch_ip()
+        # get attributes and filter out the value and comment - use value for JARM - use comment for comparison
+        Attributes = self.Object_Enrichment.get_attribute()
+        for attribute in Attributes['response']['Attribute']:
+            values = attribute['value']
+            attribute_id = attribute['id']
+            comment = attribute['comment']
+            #initiate subprocess to collect jarm fingerprints
+            jarm_process = subprocess.run(['python3', 'jarm.py', '{}'.format(values)], capture_output=True, text=True)
+            jarm_raw_data = jarm_process.stdout.strip()
+            jarm_raw_data_lines = jarm_raw_data.splitlines()
+            jarm = jarm_raw_data_lines[-1]
+            if jarm != comment: 
+                #tag ID 1444  
+                Url = 'https://'+MISP_Ip+'/attributes/addTag/{0}/{1}'.format(attribute_id, tag_Id)
+                Headers = {"Authorization": "{}".format(MISP_Key), "Accept": "application/json", "Content-Type": "application/json"}
+                response = requests.post(Url, headers=Headers, verify=False)
+                print(response.json())
+                print("Changes in JARM Signature found and the tag has been appplied to AttributeId: {0} Value {1}".format(attribute_id, values))
+            else: 
+                print("Changes in JARM Signature for AttributeId: {} have NOT been identified".format(attribute_id))
+
 def update():
     download_status = ''
     update_response = requests.get('https://raw.githubusercontent.com/salesforce/jarm/master/jarm.py')
@@ -129,9 +161,10 @@ def main():
     if args.test:
         misp_i = MISP_Config()
         o_e = Object_Enrichment(misp_i)
+        c_c = Change_Checker(o_e, misp_i)
         print(misp_i.fetch_ip())
         print(misp_i.fetch_key())
-        print(o_e.enrichment())
+        print(c_c.checker())
         
 if __name__ == "__main__":
     main()
