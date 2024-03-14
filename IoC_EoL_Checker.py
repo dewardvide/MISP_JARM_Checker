@@ -87,10 +87,10 @@ class Object_Enrichment:
             'comment' : '{}'.format(jarm), 
             }
             Json_Data = json.dumps(Data)
-            Url = 'https://'+MISP_Ip+'/attributes/edit/'+attribute_id
-            Headers = {"Authorization": "{}".format(MISP_Key), "Content-Type": "application/json"}
-            response = requests.put(Url, headers=Headers, data=Json_Data, verify=False)
-            print(response)
+            Url = 'https://'+MISP_Ip+'/attributes/edit/{}'.format(attribute_id)
+            Headers = {"Authorization": "{}".format(MISP_Key), "Accept": "application/json", "Content-Type": "application/json"}
+            response = requests.post(Url, headers=Headers, data=Json_Data, verify=False)
+            print(response.status_code)
 
 def update():
     download_status = ''
