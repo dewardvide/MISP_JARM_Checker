@@ -44,7 +44,7 @@ class Object_Enrichment:
         Data = {
             'eventid' : '{}'.format(Event_ID), 
             #get IP addresses and domains attributes
-            'type' : ["domain", "ip-src", "ip-dst"]
+            'type' : ["domain", "ip-src", "ip-dst", "hostname"]
         }
         Json_Data = json.dumps(Data)
         Url = 'https://'+MISP_Ip+'/attributes/restSearch'
