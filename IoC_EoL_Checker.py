@@ -40,7 +40,7 @@ class Object_Enrichment:
         MISP_Ip = self.MISP_Config.fetch_ip()
         MISP_Key = self.MISP_Config.fetch_key()
         #example event ID 
-        Event_ID = 458
+        Event_ID = input("Enter EventID: (458)\n")
         Data = {
             'eventid' : '{}'.format(Event_ID), 
             #get IP addresses and domains attributes
@@ -103,6 +103,7 @@ class Change_Checker():
         tag_Id = 1444
         MISP_Key = self.MISP_Config.fetch_key()
         MISP_Ip = self.MISP_Config.fetch_ip()
+
         # get attributes and filter out the value and comment - use value for JARM - use comment for comparison
         Attributes = self.Object_Enrichment.get_attribute()
         for attribute in Attributes['response']['Attribute']:
@@ -114,6 +115,7 @@ class Change_Checker():
             jarm_raw_data = jarm_process.stdout.strip()
             jarm_raw_data_lines = jarm_raw_data.splitlines()
             jarm = jarm_raw_data_lines[-1]
+
             if jarm != comment: 
                 #tag ID 1444  
                 Url = 'https://'+MISP_Ip+'/attributes/addTag/{0}/{1}'.format(attribute_id, tag_Id)
@@ -143,8 +145,13 @@ def main():
 
     # Add arguments
     parser.add_argument('-u', '--update', action='store_true', help='Update JARM.')
-    parser.add_argument('-t', '--test', action='store_true', help='Used for testing.')
+    parser.add_argument('-e', '--enrich', action='store_true', help='Use this flag to enrich attributes in a particular event.')
+    parser.add_argument('-c', '--change_check', action='store_true', help='Use this flag to check for changes in a particular event.')
     
+    #create an instance of the class
+    misp_c = MISP_Config()
+    o_e = Object_Enrichment(misp_c)
+    c_c = Change_Checker(o_e, misp_c)
 
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -158,12 +165,12 @@ def main():
     if args.update: 
         update()
 
-    if args.test:
-        misp_i = MISP_Config()
-        o_e = Object_Enrichment(misp_i)
-        c_c = Change_Checker(o_e, misp_i)
-        print(misp_i.fetch_ip())
-        print(misp_i.fetch_key())
+    if args.enrich:
+        print("MISP IP: "+misp_c.fetch_ip())
+        print(o_e.enrichment())
+    
+    if args.change_check:
+        print("MISP IP: "+misp_c.fetch_ip())
         print(c_c.checker())
         
 if __name__ == "__main__":
