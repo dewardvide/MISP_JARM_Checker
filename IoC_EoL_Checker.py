@@ -126,53 +126,58 @@ class Change_Checker():
             else: 
                 print("Changes in JARM Signature for AttributeId: {} have NOT been identified".format(attribute_id))
 
-def update():
-    download_status = ''
-    update_response = requests.get('https://raw.githubusercontent.com/salesforce/jarm/master/jarm.py')
+class Main():
+    def __init__(self):
+        pass
 
-    if update_response.status_code == 200:
-        with open('jarm.py', 'wb') as f:
-            f.write(update_response.content)
-            download_status =  print("Update Complete")
-    else: 
-        download_status = print("Update Failed. Status Code: ", update_response.status_code)
+    def update(self):
+        download_status = ''
+        update_response = requests.get('https://raw.githubusercontent.com/salesforce/jarm/master/jarm.py')
 
-    return download_status
+        if update_response.status_code == 200:
+            with open('jarm.py', 'wb') as f:
+                f.write(update_response.content)
+                download_status =  print("Update Complete")
+        else: 
+            download_status = print("Update Failed. Status Code: ", update_response.status_code)
 
-def main(): 
-    # Create ArgumentParser object
-    parser = argparse.ArgumentParser(description='IOC EOL CHECKER => Analyze Changes in the JARM signature in MISP Objects')
+        return download_status
 
-    # Add arguments
-    parser.add_argument('-u', '--update', action='store_true', help='Update JARM.')
-    parser.add_argument('-e', '--enrich', action='store_true', help='Use this flag to enrich attributes in a particular event.')
-    parser.add_argument('-c', '--change_check', action='store_true', help='Use this flag to check for changes in a particular event.')
+    def main(self): 
+        # Create ArgumentParser object
+        parser = argparse.ArgumentParser(description='IOC EOL CHECKER => Analyze Changes in the JARM signature in MISP Objects')
+
+        # Add arguments
+        parser.add_argument('-u', '--update', action='store_true', help='Update JARM.')
+        parser.add_argument('-e', '--enrich', action='store_true', help='Use this flag to enrich attributes in a particular event.')
+        parser.add_argument('-c', '--change_check', action='store_true', help='Use this flag to check for changes in a particular event.')
     
-    #create an instance of the class
-    misp_c = MISP_Config()
-    o_e = Object_Enrichment(misp_c)
-    c_c = Change_Checker(o_e, misp_c)
+        #create an instance of the class
+        misp_c = MISP_Config()
+        o_e = Object_Enrichment(misp_c)
+        c_c = Change_Checker(o_e, misp_c)
 
-    # Parse the command-line arguments
-    args = parser.parse_args()
+        # Parse the command-line arguments
+        args = parser.parse_args()
 
-    #return usage where flags are not used
-    if not any(vars(args).values()):
-        parser.print_usage()
-        return
+        #return usage where flags are not used
+        if not any(vars(args).values()):
+            parser.print_usage()
+            return
     
-    # Access the arguments
-    if args.update: 
-        update()
+        # Access the arguments
+        if args.update: 
+            self.update()
 
-    if args.enrich:
-        print("MISP IP: "+misp_c.fetch_ip())
-        print(o_e.enrichment())
+        if args.enrich:
+            print("MISP IP: "+misp_c.fetch_ip())
+            print(o_e.enrichment())
     
-    if args.change_check:
-        print("MISP IP: "+misp_c.fetch_ip())
-        print(c_c.checker())
+        if args.change_check:
+            print("MISP IP: "+misp_c.fetch_ip())
+            print(c_c.checker())
         
 if __name__ == "__main__":
-    main()
+    Main_Function = Main()
+    Main_Function.main()
 
