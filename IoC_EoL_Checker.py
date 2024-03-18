@@ -36,11 +36,10 @@ class Object_Enrichment:
     def __init__(self, MISP_Config):
         self.MISP_Config = MISP_Config
 
-    def get_attribute(self):
+    def get_attribute(self, Event_ID = input("Enter EventID: (1327)\n")):
         MISP_Ip = self.MISP_Config.fetch_ip()
         MISP_Key = self.MISP_Config.fetch_key()
         #example event ID 
-        Event_ID = input("Enter EventID: (1327)\n")
         Data = {
             'eventid' : '{}'.format(Event_ID), 
             #get IP addresses and domains attributes
