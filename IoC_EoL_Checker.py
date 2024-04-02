@@ -48,10 +48,6 @@ class Object_Enrichment:
         Json_Data = json.dumps(Data)
         Url = 'https://'+MISP_Ip+'/attributes/restSearch'
         Headers = {"Authorization": "{}".format(MISP_Key), "Content-Type": "application/json"}
-        
-        #print headers (Testing)
-        #print(Headers)
-        #print(Json_Data)
 
         #SSL verification is false
         response = requests.post(Url, headers=Headers, data=Json_Data, verify=False)
