@@ -173,6 +173,6 @@ class Main():
             print(c_c.checker())
         
 if __name__ == "__main__":
-    Main_Function = Main()
-    Main_Function.main()
+    Main_Class = Main()
+    Main_Class.main()
 
