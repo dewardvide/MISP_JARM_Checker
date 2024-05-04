@@ -70,7 +70,7 @@ options:
 
 Install my-project with npm
 
-```bash
+```shell
   npm install my-project
   cd my-project
 ```
