@@ -15,7 +15,7 @@ This project is an extension of an investigation I did for my Bachelor's thesis 
 
 JARM is a fuzzy hash so it should not be an independent source of truth when trying to identify a server. Therefore, when it comes to the identification of EOL IoCs through changes in JARM signatures, these changes should be considered in a larger IoC/attribute scoring system such as the MISP IoC decay system (explained in this [Paper](https://arxiv.org/abs/1902.03914)).
 
-## Documentation
+## Design Documentation
 
 Below is a UML sequence diagram that explains the functioning of the code. 
 
