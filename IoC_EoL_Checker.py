@@ -36,15 +36,16 @@ class Object_Enrichment:
     def __init__(self, MISP_Config):
         self.MISP_Config = MISP_Config
 
-    def get_attribute(self, Event_ID = input("Enter EventID: (1327)\n")):
+    def get_attribute(self, Event_ID):
         MISP_Ip = self.MISP_Config.fetch_ip()
         MISP_Key = self.MISP_Config.fetch_key()
-        #example event ID 
+
         Data = {
             'eventid' : '{}'.format(Event_ID), 
             #get IP addresses and domains attributes
             'type' : ["domain", "ip-src", "ip-dst", "hostname"]
         }
+
         Json_Data = json.dumps(Data)
         Url = 'https://'+MISP_Ip+'/attributes/restSearch'
         Headers = {"Authorization": "{}".format(MISP_Key), "Content-Type": "application/json"}
@@ -56,14 +57,14 @@ class Object_Enrichment:
             print("Request successful")
             return response.json()
         else:
-            print("Request failed:", response.status_code)
-            return response.text
+            print("Get Attribute Request failed:", response.status_code, response.text, "Quitting program...")
+            quit()
 
-    def enrichment(self):
+    def enrichment(self, Event_ID):
         MISP_Ip = self.MISP_Config.fetch_ip()
         MISP_Key = self.MISP_Config.fetch_key() 
         #get attributes
-        response = self.get_attribute()
+        response = self.get_attribute(Event_ID)
         #print individual attributes
         for attribute in response['response']['Attribute']:
             values = attribute['value']
@@ -73,10 +74,10 @@ class Object_Enrichment:
             jarm_raw_data = jarm_process.stdout.strip()
             jarm_raw_data_lines = jarm_raw_data.splitlines()
             jarm = jarm_raw_data_lines[-1]
-            #test
-            print(values)
-            print(attribute_id)
-            print(jarm)
+
+            print("Attribute Value: ", values)
+            print("Attribute ID: ", attribute_id)
+            print("JARM signature: ", jarm)
             #Add comment
             Data = {
             'comment' : '{}'.format(jarm), 
@@ -85,7 +86,7 @@ class Object_Enrichment:
             Url = 'https://'+MISP_Ip+'/attributes/edit/{}'.format(attribute_id)
             Headers = {"Authorization": "{}".format(MISP_Key), "Accept": "application/json", "Content-Type": "application/json"}
             response = requests.post(Url, headers=Headers, data=Json_Data, verify=False)
-            print(response.status_code)
+            print("Comment Posted with the following status code: ", response.status_code)
 
 class Change_Checker():
     #checks for changes in the JARM 
@@ -93,14 +94,13 @@ class Change_Checker():
         self.Object_Enrichment = Object_Enrichment
         self.MISP_Config = MISP_Config
 
-    def checker(self): 
+    def checker(self, Event_ID, Tag_ID): 
         #tag ID
-        tag_Id = 1444
         MISP_Key = self.MISP_Config.fetch_key()
         MISP_Ip = self.MISP_Config.fetch_ip()
 
         # get attributes and filter out the value and comment - use value for JARM - use comment for comparison
-        Attributes = self.Object_Enrichment.get_attribute()
+        Attributes = self.Object_Enrichment.get_attribute(Event_ID)
         for attribute in Attributes['response']['Attribute']:
             values = attribute['value']
             attribute_id = attribute['id']
@@ -113,7 +113,7 @@ class Change_Checker():
 
             if jarm != comment: 
                 #tag ID 1444  
-                Url = 'https://'+MISP_Ip+'/attributes/addTag/{0}/{1}'.format(attribute_id, tag_Id)
+                Url = 'https://'+MISP_Ip+'/attributes/addTag/{0}/{1}'.format(attribute_id, Tag_ID)
                 Headers = {"Authorization": "{}".format(MISP_Key), "Accept": "application/json", "Content-Type": "application/json"}
                 response = requests.post(Url, headers=Headers, verify=False)
                 print(response.json())
@@ -144,8 +144,8 @@ class Main():
 
         # Add arguments
         parser.add_argument('-u', '--update', action='store_true', help='Update JARM.')
-        parser.add_argument('-e', '--enrich', action='store_true', help='Use this flag to enrich attributes in a particular event.')
-        parser.add_argument('-c', '--change_check', action='store_true', help='Use this flag to check for changes in a particular event.')
+        parser.add_argument('-e', '--enrich', type= str, metavar='<Event_ID>', help='-e Use this flag to enrich attributes in a particular event.')
+        parser.add_argument('-c', '--change_check', nargs=2, metavar=('<Event_ID>', '<Tag_ID>'), help='-c Use this flag to check for changes in a particular event.')
     
         #create an instance of the class
         misp_c = MISP_Config()
@@ -165,12 +165,14 @@ class Main():
             self.update()
 
         if args.enrich:
+            Event_ID = args.enrich
             print("MISP IP: "+misp_c.fetch_ip())
-            print(o_e.enrichment())
+            print(o_e.enrichment(Event_ID))
     
         if args.change_check:
+            Event_ID, Tag_ID = args.change_check
             print("MISP IP: "+misp_c.fetch_ip())
-            print(c_c.checker())
+            print(c_c.checker(Event_ID, Tag_ID))
         
 if __name__ == "__main__":
     Main_Class = Main()

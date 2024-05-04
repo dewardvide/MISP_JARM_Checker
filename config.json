@@ -1,4 +1,4 @@
 {
-    "MISP_IP":"Your MISP_IP", 
-    "MISP_AUTH_KEY":"Your MISP_AUTH_KEY"
+    "MISP_IP":"localhost", 
+    "MISP_AUTH_KEY":"GWdwXCv6BLtniRBNQPISF2st145b7m3Nc1RP31i7"
 }
