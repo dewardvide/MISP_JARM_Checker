@@ -37,7 +37,7 @@ Step 3 Add your MISP server IP address and Authorization key to config.json
 
 Step 4 Run the script 
 
-```bash
+```
   MISP_JARM_Checker.py -h
   usage: MISP_JARM_Checker.py [-h] [-u] [-e <Event_ID>] [-c <Event_ID> <Tag_ID>]
 
@@ -64,14 +64,4 @@ options:
 
  - [The MISP project](https://www.misp-project.org/)
 
-
-
-## Installation
-
-Install my-project with npm
-
-```shell
-  npm install my-project
-  cd my-project
-```
-    
+ 
