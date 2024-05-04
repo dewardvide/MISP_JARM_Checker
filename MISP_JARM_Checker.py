@@ -1,6 +1,5 @@
 import requests
 import argparse
-import os 
 import subprocess
 import json
 
@@ -95,7 +94,6 @@ class Change_Checker():
         self.MISP_Config = MISP_Config
 
     def checker(self, Event_ID, Tag_ID): 
-        #tag ID
         MISP_Key = self.MISP_Config.fetch_key()
         MISP_Ip = self.MISP_Config.fetch_ip()
 
@@ -112,7 +110,6 @@ class Change_Checker():
             jarm = jarm_raw_data_lines[-1]
 
             if jarm != comment: 
-                #tag ID 1444  
                 Url = 'https://'+MISP_Ip+'/attributes/addTag/{0}/{1}'.format(attribute_id, Tag_ID)
                 Headers = {"Authorization": "{}".format(MISP_Key), "Accept": "application/json", "Content-Type": "application/json"}
                 response = requests.post(Url, headers=Headers, verify=False)
@@ -140,7 +137,7 @@ class Main():
 
     def main(self): 
         # Create ArgumentParser object
-        parser = argparse.ArgumentParser(description='IOC EOL CHECKER => Analyze Changes in the JARM signature in MISP Objects')
+        parser = argparse.ArgumentParser(description='MISP JARM Checker => Analyze Changes in the JARM signature in MISP Objects')
 
         # Add arguments
         parser.add_argument('-u', '--update', action='store_true', help='Update JARM.')
