@@ -63,6 +63,6 @@ options:
 ## Acknowledgements
 
  - [The MISP project](https://www.misp-project.org/)
- - [JARM - Saleseforce](https://github.com/salesforce/jarm)
+ - [JARM - Salesforce](https://github.com/salesforce/jarm)
 
  
